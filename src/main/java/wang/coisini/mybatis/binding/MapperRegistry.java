@@ -1,6 +1,7 @@
 package wang.coisini.mybatis.binding;
 
 import cn.hutool.core.lang.ClassScanner;
+import wang.coisini.mybatis.session.Configuration;
 import wang.coisini.mybatis.session.SqlSession;
 
 import java.util.HashMap;
@@ -14,6 +15,13 @@ import java.util.Set;
  * @Copyright: 博客：http://coisini.wang
  */
 public class MapperRegistry {
+
+
+    private Configuration config;
+
+    public MapperRegistry(Configuration config) {
+        this.config = config;
+    }
 
     /**
      * 将已添加的映射器代理加入到 HashMap

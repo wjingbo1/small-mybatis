@@ -1,5 +1,7 @@
 package wang.coisini.mybatis.test.dao;
 
+import wang.coisini.mybatis.test.po.User;
+
 /**
  * @description:
  * @author: w_jingbo
@@ -10,4 +12,6 @@ public interface IUserDao {
     String queryUserName(String username);
 
     Integer queryUserAge(String uId);
+
+    User queryUserInfoById(Long uId);
 }

@@ -1,7 +1,16 @@
 package wang.coisini.mybatis.session.defaults;
 
 import wang.coisini.mybatis.binding.MapperRegistry;
+import wang.coisini.mybatis.mapping.BoundSql;
+import wang.coisini.mybatis.mapping.Environment;
+import wang.coisini.mybatis.mapping.MappedStatement;
+import wang.coisini.mybatis.session.Configuration;
 import wang.coisini.mybatis.session.SqlSession;
+
+import java.lang.reflect.Method;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @description: 默认SqlSession实现类
@@ -11,13 +20,10 @@ import wang.coisini.mybatis.session.SqlSession;
  */
 public class DefaultSqlSession implements SqlSession {
 
-    /**
-     * 映射器注册机
-     */
-    private MapperRegistry mapperRegistry;
+    private Configuration configuration;
 
-    public DefaultSqlSession(MapperRegistry mapperRegistry) {
-        this.mapperRegistry = mapperRegistry;
+    public DefaultSqlSession(Configuration configuration) {
+        this.configuration = configuration;
     }
 
     @Override
@@ -27,13 +33,60 @@ public class DefaultSqlSession implements SqlSession {
 
     @Override
     public <T> T selectOne(String statement, Object parameter) {
-        return (T) ("你被代理了！" + "方法：" + statement + " 入参：" + parameter);
+        try {
+            MappedStatement mappedStatement = configuration.getMappedStatement(statement);
+            Environment environment = configuration.getEnvironment();
+
+            Connection connection = environment.getDataSource().getConnection();
+
+            BoundSql boundSql = mappedStatement.getBoundSql();
+            PreparedStatement preparedStatement = connection.prepareStatement(boundSql.getSql());
+            preparedStatement.setLong(1, Long.parseLong(((Object[]) parameter)[0].toString()));
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            List<T> objList = resultSet2Obj(resultSet, Class.forName(boundSql.getResultType()));
+            return objList.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
+    private <T> List<T> resultSet2Obj(ResultSet resultSet, Class<?> clazz) {
+        List<T> list = new ArrayList<>();
+        try {
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+            // 每次遍历行值
+            while (resultSet.next()) {
+                T obj = (T) clazz.newInstance();
+                for (int i = 1; i <= columnCount; i++) {
+                    Object value = resultSet.getObject(i);
+                    String columnName = metaData.getColumnName(i);
+                    String setMethod = "set" + columnName.substring(0, 1).toUpperCase() + columnName.substring(1);
+                    Method method;
+                    if (value instanceof Timestamp) {
+                        method = clazz.getMethod(setMethod, Date.class);
+                    } else {
+                        method = clazz.getMethod(setMethod, value.getClass());
+                    }
+                    method.invoke(obj, value);
+                }
+                list.add(obj);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
 
-    //获取映射器代理
     @Override
     public <T> T getMapper(Class<T> type) {
-        return mapperRegistry.getMapper(type, this);
+        return configuration.getMapper(type, this);
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
     }
 }
