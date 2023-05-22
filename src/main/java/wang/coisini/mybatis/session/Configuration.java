@@ -4,8 +4,16 @@ import wang.coisini.mybatis.binding.MapperRegistry;
 import wang.coisini.mybatis.datasource.druid.DruidDataSourceFactory;
 import wang.coisini.mybatis.datasource.pooled.PooledDataSourceFactory;
 import wang.coisini.mybatis.datasource.unpooled.UnpooledDataSourceFactory;
+import wang.coisini.mybatis.executor.Executor;
+import wang.coisini.mybatis.executor.SimpleExecutor;
+import wang.coisini.mybatis.executor.resultset.DefaultResultSetHandler;
+import wang.coisini.mybatis.executor.resultset.ResultSetHandler;
+import wang.coisini.mybatis.executor.statement.PreparedStatementHandler;
+import wang.coisini.mybatis.executor.statement.StatementHandler;
+import wang.coisini.mybatis.mapping.BoundSql;
 import wang.coisini.mybatis.mapping.Environment;
 import wang.coisini.mybatis.mapping.MappedStatement;
+import wang.coisini.mybatis.transaction.Transaction;
 import wang.coisini.mybatis.transaction.jdbc.JdbcTransactionFactory;
 import wang.coisini.mybatis.type.TypeAliasRegistry;
 
@@ -77,5 +85,28 @@ public class Configuration {
     public void setEnvironment(Environment environment) {
         this.environment = environment;
     }
+
+
+    /**
+     * 创建结果集处理器
+     */
+    public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement, BoundSql boundSql) {
+        return new DefaultResultSetHandler(executor, mappedStatement, boundSql);
+    }
+
+    /**
+     * 生产执行器
+     */
+    public Executor newExecutor(Transaction transaction) {
+        return new SimpleExecutor(this, transaction);
+    }
+
+    /**
+     * 创建语句处理器
+     */
+    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, ResultHandler resultHandler, BoundSql boundSql) {
+        return new PreparedStatementHandler(executor, mappedStatement, parameter, resultHandler, boundSql);
+    }
+
 
 }
