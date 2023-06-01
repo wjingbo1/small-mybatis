@@ -25,6 +25,7 @@ public class PooledDataSource implements DataSource {
 
     private final UnpooledDataSource dataSource;
 
+
     // 活跃连接数
     protected int poolMaximumActiveConnections = 10;
     // 空闲连接数

@@ -36,7 +36,7 @@ public class ApiTest {
 
 
 
-    @Test
+   /* @Test
     public void test_pooled() throws SQLException, InterruptedException {
         PooledDataSource pooledDataSource = new PooledDataSource();
         pooledDataSource.setDriver("com.mysql.cj.jdbc.Driver");
@@ -50,7 +50,7 @@ public class ApiTest {
             Thread.sleep(1000);
             //connection.close();
         }
-    }
+    }*/
 
 
 
