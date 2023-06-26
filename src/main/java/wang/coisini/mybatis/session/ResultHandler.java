@@ -7,4 +7,6 @@ package wang.coisini.mybatis.session;
  * @Copyright: 博客：http://coisini.wang
  */
 public interface ResultHandler {
+
+    void handleResult();
 }

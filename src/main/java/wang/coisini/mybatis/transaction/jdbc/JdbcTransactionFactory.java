@@ -8,7 +8,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 
 /**
- * @description:
+ * @description: JdbcTransaction 工厂
  * @author: w_jingbo
  * @date: 2023/5/20
  * @Copyright: 博客：http://coisini.wang

@@ -8,7 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * @description:
+ * @description: JDBC 事务，直接利用 JDBC 的 commit、rollback。依赖于数据源获得的连接来管理事务范围。
  * @author: w_jingbo
  * @date: 2023/5/20
  * @Copyright: 博客：http://coisini.wang
