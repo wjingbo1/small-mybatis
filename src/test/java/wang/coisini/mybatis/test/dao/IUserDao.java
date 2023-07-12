@@ -9,9 +9,10 @@ import wang.coisini.mybatis.test.po.User;
  * @Copyright: 博客：http://coisini.wang
  */
 public interface IUserDao {
-    String queryUserName(String username);
 
-    Integer queryUserAge(String uId);
+    User queryUserInfoById(Long id);
 
-    User queryUserInfoById(Long uId);
+    User queryUserInfo(User req);
+
+
 }

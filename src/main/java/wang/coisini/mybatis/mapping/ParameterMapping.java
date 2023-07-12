@@ -2,6 +2,8 @@ package wang.coisini.mybatis.mapping;
 
 import wang.coisini.mybatis.session.Configuration;
 import wang.coisini.mybatis.type.JdbcType;
+import wang.coisini.mybatis.type.TypeHandler;
+import wang.coisini.mybatis.type.TypeHandlerRegistry;
 
 /**
  * @description:
@@ -19,6 +21,7 @@ public class ParameterMapping {
     private Class<?> javaType = Object.class;
     // jdbcType=NUMERIC
     private JdbcType jdbcType;
+    private TypeHandler<?> typeHandler;
 
     private ParameterMapping() {
     }
@@ -44,6 +47,12 @@ public class ParameterMapping {
         }
 
         public ParameterMapping build() {
+            if (parameterMapping.typeHandler == null && parameterMapping.javaType != null) {
+                Configuration configuration = parameterMapping.configuration;
+                TypeHandlerRegistry typeHandlerRegistry = configuration.getTypeHandlerRegistry();
+                parameterMapping.typeHandler = typeHandlerRegistry.getTypeHandler(parameterMapping.javaType, parameterMapping.jdbcType);
+            }
+
             return parameterMapping;
         }
     }
@@ -62,6 +71,10 @@ public class ParameterMapping {
 
     public JdbcType getJdbcType() {
         return jdbcType;
+    }
+
+    public TypeHandler<?> getTypeHandler() {
+        return typeHandler;
     }
 
 }

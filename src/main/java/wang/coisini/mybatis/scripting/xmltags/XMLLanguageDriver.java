@@ -1,8 +1,12 @@
 package wang.coisini.mybatis.scripting.xmltags;
 
 import org.dom4j.Element;
+import wang.coisini.mybatis.executor.parameter.ParameterHandler;
+import wang.coisini.mybatis.mapping.BoundSql;
+import wang.coisini.mybatis.mapping.MappedStatement;
 import wang.coisini.mybatis.mapping.SqlSource;
 import wang.coisini.mybatis.scripting.LanguageDriver;
+import wang.coisini.mybatis.scripting.defaults.DefaultParameterHandler;
 import wang.coisini.mybatis.session.Configuration;
 
 /**
@@ -18,5 +22,10 @@ public class XMLLanguageDriver implements LanguageDriver {
         // 用XML脚本构建器解析
         XMLScriptBuilder builder = new XMLScriptBuilder(configuration, script, parameterType);
         return builder.parseScriptNode();
+    }
+
+    @Override
+    public ParameterHandler createParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
+        return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
     }
 }

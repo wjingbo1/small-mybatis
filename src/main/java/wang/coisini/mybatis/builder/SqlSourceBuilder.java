@@ -1,9 +1,12 @@
 package wang.coisini.mybatis.builder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import wang.coisini.mybatis.mapping.ParameterMapping;
 import wang.coisini.mybatis.mapping.SqlSource;
 import wang.coisini.mybatis.parsing.GenericTokenParser;
 import wang.coisini.mybatis.parsing.TokenHandler;
+import wang.coisini.mybatis.reflection.MetaClass;
 import wang.coisini.mybatis.reflection.MetaObject;
 import wang.coisini.mybatis.session.Configuration;
 
@@ -18,6 +21,8 @@ import java.util.Map;
  * @Copyright: 博客：http://coisini.wang
  */
 public class SqlSourceBuilder extends BaseBuilder{
+
+    private static Logger logger = LoggerFactory.getLogger(SqlSourceBuilder.class);
 
     private static final String parameterProperties = "javaType,jdbcType,mode,numericScale,resultMap,typeHandler,jdbcTypeName";
 
@@ -60,7 +65,21 @@ public class SqlSourceBuilder extends BaseBuilder{
             // 先解析参数映射,就是转化成一个 HashMap | #{favouriteSection,jdbcType=VARCHAR}
             Map<String, String> propertiesMap = new ParameterExpression(content);
             String property = propertiesMap.get("property");
-            Class<?> propertyType = parameterType;
+            Class<?> propertyType;
+            if (typeHandlerRegistry.hasTypeHandler(parameterType)) {
+                propertyType = parameterType;
+            } else if (property != null) {
+                MetaClass metaClass = MetaClass.forClass(parameterType);
+                if (metaClass.hasGetter(property)) {
+                    propertyType = metaClass.getGetterType(property);
+                } else {
+                    propertyType = Object.class;
+                }
+            } else {
+                propertyType = Object.class;
+            }
+
+            logger.info("构建参数映射 property：{} propertyType：{}", property, propertyType);
             ParameterMapping.Builder builder = new ParameterMapping.Builder(configuration, property, propertyType);
             return builder.build();
         }
