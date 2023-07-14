@@ -4,6 +4,7 @@ package wang.coisini.mybatis.executor;
 import wang.coisini.mybatis.mapping.BoundSql;
 import wang.coisini.mybatis.mapping.MappedStatement;
 import wang.coisini.mybatis.session.ResultHandler;
+import wang.coisini.mybatis.session.RowBounds;
 import wang.coisini.mybatis.transaction.Transaction;
 
 import java.sql.SQLException;
@@ -19,7 +20,7 @@ public interface Executor {
 
     ResultHandler NO_RESULT_HANDLER = null;
 
-    <E> List<E> query(MappedStatement ms, Object parameter, ResultHandler resultHandler, BoundSql boundSql);
+    <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql);
 
     Transaction getTransaction();
 
