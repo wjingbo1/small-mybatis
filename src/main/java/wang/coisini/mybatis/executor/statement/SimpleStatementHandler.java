@@ -34,6 +34,13 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     }
 
     @Override
+    public int update(Statement statement) throws SQLException {
+        String sql = boundSql.getSql();
+        statement.execute(sql);
+        return statement.getUpdateCount();
+    }
+
+    @Override
     public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {
         String sql = boundSql.getSql();
         statement.execute(sql);

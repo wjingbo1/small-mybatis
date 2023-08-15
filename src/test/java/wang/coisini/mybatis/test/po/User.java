@@ -20,6 +20,13 @@ public class User {
     }
 
 
+
+    public User(Long id, String userId, String userName) {
+        this.id = id;
+        this.userId = userId;
+        this.userName = userName;
+    }
+
     public User(Long id) {
         this.id = id;
     }

@@ -9,6 +9,7 @@ import wang.coisini.mybatis.session.RowBounds;
 import wang.coisini.mybatis.transaction.Transaction;
 
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -41,6 +42,13 @@ public abstract class BaseExecutor implements Executor{
         }
         return doQuery(ms, parameter, rowBounds, resultHandler, boundSql);
     }
+
+    @Override
+    public int update(MappedStatement ms, Object parameter) throws SQLException {
+        return doUpdate(ms, parameter);
+    }
+
+    protected abstract int doUpdate(MappedStatement ms, Object parameter) throws SQLException;
 
     protected abstract <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql);
 
@@ -84,6 +92,15 @@ public abstract class BaseExecutor implements Executor{
         } finally {
             transaction = null;
             closed = true;
+        }
+    }
+
+    protected void closeStatement(Statement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException ignore) {
+            }
         }
     }
 

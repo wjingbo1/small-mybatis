@@ -24,6 +24,8 @@ public interface Executor {
 
     Transaction getTransaction();
 
+    int update(MappedStatement ms, Object parameter) throws SQLException;
+
     void commit(boolean required) throws SQLException;
 
     void rollback(boolean required) throws SQLException;
