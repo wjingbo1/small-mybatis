@@ -17,7 +17,8 @@
     </environments>
 
     <mappers>
-        <mapper resource="mapper/User_Mapper.xml"/>
+<!--        <mapper resource="mapper/User_Mapper.xml"/>-->
+        <mapper class="wang.coisini.mybatis.test.dao.IUserDao"/>
     </mappers>
 
 </configuration>

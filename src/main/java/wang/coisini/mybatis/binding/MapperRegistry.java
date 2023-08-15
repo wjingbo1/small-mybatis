@@ -1,6 +1,7 @@
 package wang.coisini.mybatis.binding;
 
 import cn.hutool.core.lang.ClassScanner;
+import wang.coisini.mybatis.builder.annotation.MapperAnnotationBuilder;
 import wang.coisini.mybatis.session.Configuration;
 import wang.coisini.mybatis.session.SqlSession;
 
@@ -40,7 +41,6 @@ public class MapperRegistry {
         }
     }
 
-    //将Mapper注册到map中
     public <T> void addMapper(Class<T> type) {
         /* Mapper 必须是接口才会注册 */
         if (type.isInterface()) {
@@ -50,14 +50,16 @@ public class MapperRegistry {
             }
             // 注册映射器代理工厂
             knownMappers.put(type, new MapperProxyFactory<>(type));
+
+            // 解析注解类语句配置
+            MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
+            parser.parse();
         }
     }
 
-    //检查map中是否已存在这个接口映射器工厂
     public <T> boolean hasMapper(Class<T> type) {
         return knownMappers.containsKey(type);
     }
-
 
     public void addMappers(String packageName) {
         Set<Class<?>> mapperSet = ClassScanner.scanPackage(packageName);

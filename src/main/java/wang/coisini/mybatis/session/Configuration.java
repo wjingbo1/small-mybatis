@@ -14,6 +14,7 @@ import wang.coisini.mybatis.executor.statement.StatementHandler;
 import wang.coisini.mybatis.mapping.BoundSql;
 import wang.coisini.mybatis.mapping.Environment;
 import wang.coisini.mybatis.mapping.MappedStatement;
+import wang.coisini.mybatis.mapping.ResultMap;
 import wang.coisini.mybatis.reflection.MetaObject;
 import wang.coisini.mybatis.reflection.factory.DefaultObjectFactory;
 import wang.coisini.mybatis.reflection.factory.ObjectFactory;
@@ -48,6 +49,8 @@ public class Configuration {
 
     // 映射的语句，存在Map里
     protected final Map<String, MappedStatement> mappedStatements = new HashMap<>();
+    // 结果映射，存在Map里
+    protected final Map<String, ResultMap> resultMaps = new HashMap<>();
 
     // 类型别名注册机
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
@@ -170,6 +173,14 @@ public class Configuration {
 
     public ObjectFactory getObjectFactory() {
         return objectFactory;
+    }
+
+    public ResultMap getResultMap(String id) {
+        return resultMaps.get(id);
+    }
+
+    public void addResultMap(ResultMap resultMap) {
+        resultMaps.put(resultMap.getId(), resultMap);
     }
 
 }
