@@ -1,6 +1,7 @@
 package wang.coisini.mybatis.executor.statement;
 
 import wang.coisini.mybatis.executor.Executor;
+import wang.coisini.mybatis.executor.keygen.KeyGenerator;
 import wang.coisini.mybatis.mapping.BoundSql;
 import wang.coisini.mybatis.mapping.MappedStatement;
 import wang.coisini.mybatis.session.ResultHandler;
@@ -21,7 +22,7 @@ import java.util.List;
 public class PreparedStatementHandler extends BaseStatementHandler{
 
 
-    public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
+    public PreparedStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject, RowBounds rowBounds,  ResultHandler resultHandler, BoundSql boundSql) {
         super(executor, mappedStatement, parameterObject, rowBounds, resultHandler, boundSql);
     }
 
@@ -43,9 +44,12 @@ public class PreparedStatementHandler extends BaseStatementHandler{
     public int update(Statement statement) throws SQLException {
         PreparedStatement ps = (PreparedStatement) statement;
         ps.execute();
-        return ps.getUpdateCount();
+        int rows = ps.getUpdateCount();
+        Object parameterObject = boundSql.getParameterObject();
+        KeyGenerator keyGenerator = mappedStatement.getKeyGenerator();
+        keyGenerator.processAfter(executor, mappedStatement, ps, parameterObject);
+        return rows;
     }
-
 
     @Override
     public <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException {

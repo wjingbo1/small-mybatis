@@ -53,8 +53,11 @@ public class DefaultSqlSession implements SqlSession {
     public <E> List<E> selectList(String statement, Object parameter) {
         logger.info("执行查询 statement：{} parameter：{}", statement, JSON.toJSONString(parameter));
         MappedStatement ms = configuration.getMappedStatement(statement);
-
-        return executor.query(ms, parameter, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER, ms.getSqlSource().getBoundSql(parameter));
+        try {
+            return executor.query(ms, parameter, RowBounds.DEFAULT, Executor.NO_RESULT_HANDLER, ms.getSqlSource().getBoundSql(parameter));
+        } catch (SQLException e) {
+            throw new RuntimeException("Error querying database.  Cause: " + e);
+        }
     }
 
     @Override

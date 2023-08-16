@@ -1,8 +1,11 @@
 package wang.coisini.mybatis.builder;
 
+import wang.coisini.mybatis.executor.keygen.KeyGenerator;
 import wang.coisini.mybatis.mapping.*;
+import wang.coisini.mybatis.reflection.MetaClass;
 import wang.coisini.mybatis.scripting.LanguageDriver;
 import wang.coisini.mybatis.session.Configuration;
+import wang.coisini.mybatis.type.TypeHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +24,38 @@ public class MapperBuilderAssistant extends BaseBuilder{
     public MapperBuilderAssistant(Configuration configuration, String resource) {
         super(configuration);
         this.resource = resource;
+    }
+
+    // step-13 新增方法
+    public ResultMapping buildResultMapping(
+            Class<?> resultType,
+            String property,
+            String column,
+            List<ResultFlag> flags) {
+
+        Class<?> javaTypeClass = resolveResultJavaType(resultType, property, null);
+        TypeHandler<?> typeHandlerInstance = resolveTypeHandler(javaTypeClass, null);
+
+        ResultMapping.Builder builder = new ResultMapping.Builder(configuration, property, column, javaTypeClass);
+        builder.typeHandler(typeHandlerInstance);
+        builder.flags(flags);
+
+        return builder.build();
+
+    }
+
+    private Class<?> resolveResultJavaType(Class<?> resultType, String property, Class<?> javaType) {
+        if (javaType == null && property != null) {
+            try {
+                MetaClass metaResultType = MetaClass.forClass(resultType);
+                javaType = metaResultType.getSetterType(property);
+            } catch (Exception ignore) {
+            }
+        }
+        if (javaType == null) {
+            javaType = Object.class;
+        }
+        return javaType;
     }
 
     public String getCurrentNamespace() {
@@ -60,11 +95,17 @@ public class MapperBuilderAssistant extends BaseBuilder{
             Class<?> parameterType,
             String resultMap,
             Class<?> resultType,
+            KeyGenerator keyGenerator,
+            String keyProperty,
             LanguageDriver lang
     ) {
         // 给id加上namespace前缀：cn.bugstack.mybatis.test.dao.IUserDao.queryUserInfoById
         id = applyCurrentNamespace(id, false);
+
         MappedStatement.Builder statementBuilder = new MappedStatement.Builder(configuration, id, sqlCommandType, sqlSource, resultType);
+        statementBuilder.resource(resource);
+        statementBuilder.keyGenerator(keyGenerator);
+        statementBuilder.keyProperty(keyProperty);
 
         // 结果映射，给 MappedStatement#resultMaps
         setStatementResultMap(resultMap, resultType, statementBuilder);
@@ -107,7 +148,11 @@ public class MapperBuilderAssistant extends BaseBuilder{
         statementBuilder.resultMaps(resultMaps);
     }
 
+    // step-13 新增方法
     public ResultMap addResultMap(String id, Class<?> type, List<ResultMapping> resultMappings) {
+        // 补全ID全路径，如：cn.bugstack.mybatis.test.dao.IActivityDao + activityMap
+        id = applyCurrentNamespace(id, false);
+
         ResultMap.Builder inlineResultMapBuilder = new ResultMap.Builder(
                 configuration,
                 id,
