@@ -10,7 +10,7 @@ import wang.coisini.mybatis.test.po.Activity;
  */
 public interface IActivityDao {
 
-    Activity queryActivityById(Long activityId);
+    Activity queryActivityById(Activity activity);
 
     Integer insert(Activity activity);
 
