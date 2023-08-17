@@ -16,6 +16,8 @@ import wang.coisini.mybatis.mapping.BoundSql;
 import wang.coisini.mybatis.mapping.Environment;
 import wang.coisini.mybatis.mapping.MappedStatement;
 import wang.coisini.mybatis.mapping.ResultMap;
+import wang.coisini.mybatis.plugin.Interceptor;
+import wang.coisini.mybatis.plugin.InterceptorChain;
 import wang.coisini.mybatis.reflection.MetaObject;
 import wang.coisini.mybatis.reflection.factory.DefaultObjectFactory;
 import wang.coisini.mybatis.reflection.factory.ObjectFactory;
@@ -54,6 +56,9 @@ public class Configuration {
     // 结果映射，存在Map里
     protected final Map<String, ResultMap> resultMaps = new HashMap<>();
     protected final Map<String, KeyGenerator> keyGenerators = new HashMap<>();
+
+    // 插件拦截器链
+    protected final InterceptorChain interceptorChain = new InterceptorChain();
 
     // 类型别名注册机
     protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
@@ -138,7 +143,11 @@ public class Configuration {
      * 创建语句处理器
      */
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) {
-        return new PreparedStatementHandler(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
+        // 创建语句处理器，Mybatis 这里加了路由 STATEMENT、PREPARED、CALLABLE 我们默认只根据预处理进行实例化
+        StatementHandler statementHandler = new PreparedStatementHandler(executor, mappedStatement, parameter, rowBounds, resultHandler, boundSql);
+        // 嵌入插件，代理对象
+        statementHandler = (StatementHandler) interceptorChain.pluginAll(statementHandler);
+        return statementHandler;
     }
 
     // 创建元对象
@@ -204,6 +213,10 @@ public class Configuration {
 
     public void setUseGeneratedKeys(boolean useGeneratedKeys) {
         this.useGeneratedKeys = useGeneratedKeys;
+    }
+
+    public void addInterceptor(Interceptor interceptorInstance) {
+        interceptorChain.addInterceptor(interceptorInstance);
     }
 
 }

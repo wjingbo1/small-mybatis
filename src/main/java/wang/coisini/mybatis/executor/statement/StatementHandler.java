@@ -1,5 +1,6 @@
 package wang.coisini.mybatis.executor.statement;
 
+import wang.coisini.mybatis.mapping.BoundSql;
 import wang.coisini.mybatis.session.ResultHandler;
 
 import java.sql.Connection;
@@ -26,5 +27,8 @@ public interface StatementHandler {
 
     /** 执行查询 */
     <E> List<E> query(Statement statement, ResultHandler resultHandler) throws SQLException;
+
+    /** 获取绑定SQL */
+    BoundSql getBoundSql();
 
 }
