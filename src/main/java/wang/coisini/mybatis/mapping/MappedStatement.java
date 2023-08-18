@@ -25,6 +25,7 @@ public class MappedStatement {
     Class<?> resultType;
     private LanguageDriver lang;
     private List<ResultMap> resultMaps;
+    private boolean flushCacheRequired;
     // step-14 新增
     private KeyGenerator keyGenerator;
     private String[] keyProperties;
@@ -142,6 +143,10 @@ public class MappedStatement {
 
     public String getResource() {
         return resource;
+    }
+
+    public boolean isFlushCacheRequired() {
+        return flushCacheRequired;
     }
 
 
