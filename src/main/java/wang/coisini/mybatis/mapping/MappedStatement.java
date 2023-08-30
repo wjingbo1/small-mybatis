@@ -1,5 +1,6 @@
 package wang.coisini.mybatis.mapping;
 
+import wang.coisini.mybatis.cache.Cache;
 import wang.coisini.mybatis.executor.keygen.Jdbc3KeyGenerator;
 import wang.coisini.mybatis.executor.keygen.KeyGenerator;
 import wang.coisini.mybatis.executor.keygen.NoKeyGenerator;
@@ -30,6 +31,8 @@ public class MappedStatement {
     private KeyGenerator keyGenerator;
     private String[] keyProperties;
     private String[] keyColumns;
+    private Cache cache;
+    private boolean useCache;
 
     MappedStatement() {
         // constructor disabled
@@ -91,6 +94,21 @@ public class MappedStatement {
             return this;
         }
 
+        public Builder cache(Cache cache) {
+            mappedStatement.cache = cache;
+            return this;
+        }
+
+        public Builder flushCacheRequired(boolean flushCacheRequired) {
+            mappedStatement.flushCacheRequired = flushCacheRequired;
+            return this;
+        }
+
+        public Builder useCache(boolean useCache) {
+            mappedStatement.useCache = useCache;
+            return this;
+        }
+
     }
 
     private static String[] delimitedStringToArray(String in) {
@@ -147,6 +165,14 @@ public class MappedStatement {
 
     public boolean isFlushCacheRequired() {
         return flushCacheRequired;
+    }
+
+    public boolean isUseCache() {
+        return useCache;
+    }
+
+    public Cache getCache() {
+        return cache;
     }
 
 

@@ -7,6 +7,7 @@ import org.dom4j.io.SAXReader;
 import wang.coisini.mybatis.builder.BaseBuilder;
 import wang.coisini.mybatis.builder.MapperBuilderAssistant;
 import wang.coisini.mybatis.builder.ResultMapResolver;
+import wang.coisini.mybatis.cache.Cache;
 import wang.coisini.mybatis.io.Resources;
 import wang.coisini.mybatis.mapping.ResultFlag;
 import wang.coisini.mybatis.mapping.ResultMap;
@@ -17,6 +18,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @description: XML映射构建器
@@ -70,15 +72,44 @@ public class XMLMapperBuilder extends BaseBuilder {
         }
         builderAssistant.setCurrentNamespace(namespace);
 
-        // 2. 解析resultMap step-13 新增
+        // 2. 配置cache
+        cacheElement(element.element("cache"));
+
+        // 3. 解析resultMap step-13 新增
         resultMapElements(element.elements("resultMap"));
 
-        // 3.配置select|insert|update|delete
+        // 4.配置select|insert|update|delete
         buildStatementFromContext(element.elements("select"),
                 element.elements("insert"),
                 element.elements("update"),
                 element.elements("delete")
         );
+    }
+
+    /**
+     * <cache eviction="FIFO" flushInterval="600000" size="512" readOnly="true"/>
+     */
+    private void cacheElement(Element context) {
+        if (context == null) return;
+        // 基础配置信息
+        String type = context.attributeValue("type", "PERPETUAL");
+        Class<? extends Cache> typeClass = typeAliasRegistry.resolveAlias(type);
+        // 缓存队列 FIFO
+        String eviction = context.attributeValue("eviction", "FIFO");
+        Class<? extends Cache> evictionClass = typeAliasRegistry.resolveAlias(eviction);
+        Long flushInterval = Long.valueOf(context.attributeValue("flushInterval"));
+        Integer size = Integer.valueOf(context.attributeValue("size"));
+        boolean readWrite = !Boolean.parseBoolean(context.attributeValue("readOnly", "false"));
+        boolean blocking = !Boolean.parseBoolean(context.attributeValue("blocking", "false"));
+
+        // 解析额外属性信息；<property name="cacheFile" value="/tmp/xxx-cache.tmp"/>
+        List<Element> elements = context.elements();
+        Properties props = new Properties();
+        for (Element element : elements) {
+            props.setProperty(element.attributeValue("name"), element.attributeValue("value"));
+        }
+        // 构建缓存
+        builderAssistant.useNewCache(typeClass, evictionClass, flushInterval, size, readWrite, blocking, props);
     }
 
     private void resultMapElements(List<Element> list) {
@@ -109,13 +140,13 @@ public class XMLMapperBuilder extends BaseBuilder {
         resultMappings.addAll(additionalResultMappings);
 
         List<Element> resultChildren = resultMapNode.elements();
-         for (Element resultChild : resultChildren) {
+        for (Element resultChild : resultChildren) {
             List<ResultFlag> flags = new ArrayList<>();
-             if ("id".equals(resultChild.getName())) {
+            if ("id".equals(resultChild.getName())) {
                 flags.add(ResultFlag.ID);
             }
             // 构建 ResultMapping
-              resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
+            resultMappings.add(buildResultMappingFromContext(resultChild, typeClass, flags));
         }
 
         // 创建结果映射解析器

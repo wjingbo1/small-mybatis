@@ -5,16 +5,20 @@
 <configuration>
 
     <settings>
+        <!-- 全局缓存：true/false -->
+        <setting name="cacheEnabled" value="true"/>
         <!--缓存级别：SESSION/STATEMENT-->
-        <setting name="localCacheScope" value="SESSION"/>
+        <setting name="localCacheScope" value="STATEMENT"/>
     </settings>
 
+
+<!--
     <plugins>
         <plugin interceptor="wang.coisini.mybatis.test.plugin.TestPlugin">
             <property name="test00" value="100"/>
             <property name="test01" value="200"/>
         </plugin>
-    </plugins>
+    </plugins>-->
 
     <environments default="development">
         <environment id="development">
